@@ -23,4 +23,6 @@ export type ProjectFileList = Array<ProjectFile>;
 
 export type ErrorResponse = {
   message: string;
-}
+};
+
+export type ClientList = Array<{ name: string; url: string }>;

@@ -14,7 +14,7 @@
  * Payload: adds necessary payload for the request to be completed
  */
 
-import { LogOrigin } from 'ontime-types';
+import { ClientList, LogOrigin } from 'ontime-types';
 
 import { WebSocket, WebSocketServer } from 'ws';
 import type { Server } from 'http';
@@ -27,11 +27,15 @@ import { logger } from '../classes/Logger.js';
 
 let instance;
 
+type clientType = {
+  url: string;
+};
+
 export class SocketServer implements IAdapter {
   private readonly MAX_PAYLOAD = 1024 * 256; // 256Kb
 
   private wss: WebSocketServer | null;
-  private readonly clientIds: Set<string>;
+  private readonly clients: Map<string, clientType>;
 
   constructor() {
     if (instance) {
@@ -40,7 +44,7 @@ export class SocketServer implements IAdapter {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias -- this logic is used to ensure singleton
     instance = this;
-    this.clientIds = new Set<string>();
+    this.clients = new Map<string, clientType>();
     this.wss = null;
   }
 
@@ -49,7 +53,7 @@ export class SocketServer implements IAdapter {
 
     this.wss.on('connection', (ws) => {
       let clientId = getRandomName();
-      this.clientIds.add(clientId);
+      this.clients.set(clientId, { url: '' });
       logger.info(LogOrigin.Client, `${this.wss.clients.size} Connections with new: ${clientId}`);
 
       // send store payload on connect
@@ -71,7 +75,7 @@ export class SocketServer implements IAdapter {
 
       ws.on('close', () => {
         logger.info(LogOrigin.Client, `${this.wss.clients.size} Connections with disconnected: ${clientId}`);
-        this.clientIds.delete(clientId);
+        this.clients.delete(clientId);
       });
 
       ws.on('message', (data) => {
@@ -97,8 +101,8 @@ export class SocketServer implements IAdapter {
             if (payload) {
               const previousName = clientId;
               clientId = payload;
-              this.clientIds.delete(previousName);
-              this.clientIds.add(clientId);
+              this.clients.delete(previousName);
+              this.clients.set(clientId, { url: '' });
               logger.info(LogOrigin.Client, `Client ${previousName} renamed to ${clientId}`);
             }
             ws.send(
@@ -152,6 +156,12 @@ export class SocketServer implements IAdapter {
         client.send(JSON.stringify(message));
       }
     });
+  }
+
+  getClientList(): ClientList {
+    const list = new Array(0);
+    this.clients.forEach((value, key) => list.push({ name: key, ...value }));
+    return list;
   }
 
   shutdown() {

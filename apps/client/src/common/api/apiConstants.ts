@@ -4,6 +4,7 @@ export const ALIASES = ['aliases'];
 export const USERFIELDS = ['userFields'];
 export const RUNDOWN = ['rundown'];
 export const APP_INFO = ['appinfo'];
+export const CLIENT_LIST = ['clientlist'];
 export const OSC_SETTINGS = ['oscSettings'];
 export const HTTP_SETTINGS = ['httpSettings'];
 export const APP_SETTINGS = ['appSettings'];
