@@ -1,4 +1,5 @@
 import { OSCSettings } from '../../definitions/core/OscSettings.type.js';
+import { ReactClientType } from '../../definitions/core/ReactClient.type.js';
 
 export type NetworkInterface = {
   name: string;
@@ -25,4 +26,4 @@ export type ErrorResponse = {
   message: string;
 };
 
-export type ClientList = Array<{ name: string; url: string }>;
+export type ReactClientList = Array<ReactClientType>;

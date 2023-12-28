@@ -14,7 +14,7 @@
  * Payload: adds necessary payload for the request to be completed
  */
 
-import { ClientList, LogOrigin } from 'ontime-types';
+import { ReactClientList, ReactClientType, LogOrigin } from 'ontime-types';
 
 import { WebSocket, WebSocketServer } from 'ws';
 import type { Server } from 'http';
@@ -27,15 +27,11 @@ import { logger } from '../classes/Logger.js';
 
 let instance;
 
-type clientType = {
-  url: string;
-};
-
 export class SocketServer implements IAdapter {
   private readonly MAX_PAYLOAD = 1024 * 256; // 256Kb
 
   private wss: WebSocketServer | null;
-  private readonly clients: Map<string, clientType>;
+  private readonly clients: Map<string, ReactClientType>;
 
   constructor() {
     if (instance) {
@@ -44,7 +40,7 @@ export class SocketServer implements IAdapter {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias -- this logic is used to ensure singleton
     instance = this;
-    this.clients = new Map<string, clientType>();
+    this.clients = new Map<string, ReactClientType>();
     this.wss = null;
   }
 
@@ -53,7 +49,7 @@ export class SocketServer implements IAdapter {
 
     this.wss.on('connection', (ws) => {
       let clientId = getRandomName();
-      this.clients.set(clientId, { url: '' });
+      this.clients.set(clientId, { name: clientId, url: '', parameters: '' });
       logger.info(LogOrigin.Client, `${this.wss.clients.size} Connections with new: ${clientId}`);
 
       // send store payload on connect
@@ -102,7 +98,8 @@ export class SocketServer implements IAdapter {
               const previousName = clientId;
               clientId = payload;
               this.clients.delete(previousName);
-              this.clients.set(clientId, { url: '' });
+              const name = clientId;
+              this.clients.set(clientId, { ...this.clients.get(clientId), name });
               logger.info(LogOrigin.Client, `Client ${previousName} renamed to ${clientId}`);
             }
             ws.send(
@@ -111,6 +108,24 @@ export class SocketServer implements IAdapter {
                 payload: clientId,
               }),
             );
+            return;
+          }
+
+          if (type === 'set-client-url') {
+            if (payload) {
+              const url = payload;
+              this.clients.set(clientId, { ...this.clients.get(clientId), url });
+              // logger.info(LogOrigin.Client, `Client ${previousName} renamed to ${clientId}`);
+            }
+            return;
+          }
+
+          if (type === 'set-client-parameters') {
+            if (payload) {
+              const parameters = payload;
+              this.clients.set(clientId, { ...this.clients.get(clientId), parameters });
+              // logger.info(LogOrigin.Client, `Client ${previousName} renamed to ${clientId}`);
+            }
             return;
           }
 
@@ -158,7 +173,7 @@ export class SocketServer implements IAdapter {
     });
   }
 
-  getClientList(): ClientList {
+  getClientList(): ReactClientList {
     const list = new Array(0);
     this.clients.forEach((value, key) => list.push({ name: key, ...value }));
     return list;

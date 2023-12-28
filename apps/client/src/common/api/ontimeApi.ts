@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import {
   Alias,
-  ClientList,
   DatabaseModel,
   GetInfo,
   HttpSettings,
@@ -9,6 +8,7 @@ import {
   OSCSettings,
   OscSubscription,
   ProjectData,
+  ReactClientList,
   Settings,
   UserFields,
   ViewSettings,
@@ -50,7 +50,7 @@ export async function getInfo(): Promise<GetInfo> {
  * @description HTTP request to retrieve client list
  * @return {Promise}
  */
-export async function getClientList(): Promise<ClientList> {
+export async function getClientList(): Promise<ReactClientList> {
   const res = await axios.get(`${ontimeURL}/clients`);
   return res.data;
 }

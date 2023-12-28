@@ -23,6 +23,8 @@ export const connectSocket = (preferredClientName?: string) => {
     if (preferredClientName) {
       socketSendJson('set-client-name', preferredClientName);
     }
+    socketSendJson('set-client-url', window.location.pathname);
+    socketSendJson('set-client-parameters', window.location.search);
   };
 
   websocket.onclose = () => {

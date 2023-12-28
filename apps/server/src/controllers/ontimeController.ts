@@ -7,7 +7,7 @@ import type {
   ProjectData,
   ProjectFileList,
   ErrorResponse,
-  ClientList,
+  ReactClientList,
 } from 'ontime-types';
 
 import { RequestHandler, Request, Response } from 'express';
@@ -143,7 +143,7 @@ export const getInfo = async (req: Request, res: Response<GetInfo>) => {
 
 // Create controller for GET request to '/ontime/clients'
 // Returns -
-export const getClientList = async (req: Request, res: Response<ClientList>) => {
+export const getClientList = async (req: Request, res: Response<ReactClientList>) => {
   const list = socket.getClientList();
   res.status(200).send(list);
 };
