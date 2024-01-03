@@ -14,7 +14,7 @@
  * Payload: adds necessary payload for the request to be completed
  */
 
-import { ReactClientList, ReactClientType, LogOrigin } from 'ontime-types';
+import { LogOrigin, ReactClient } from 'ontime-types';
 
 import { WebSocket, WebSocketServer } from 'ws';
 import type { Server } from 'http';
@@ -27,11 +27,12 @@ import { logger } from '../classes/Logger.js';
 
 let instance;
 
+type ReactClientWS = ReactClient & { ws: WebSocket };
 export class SocketServer implements IAdapter {
   private readonly MAX_PAYLOAD = 1024 * 256; // 256Kb
 
   private wss: WebSocketServer | null;
-  private readonly clients: Map<string, ReactClientType>;
+  private readonly clients: Map<string, ReactClientWS>;
 
   constructor() {
     if (instance) {
@@ -40,16 +41,16 @@ export class SocketServer implements IAdapter {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias -- this logic is used to ensure singleton
     instance = this;
-    this.clients = new Map<string, ReactClientType>();
+    this.clients = new Map<string, ReactClientWS>();
     this.wss = null;
   }
 
   init(server: Server) {
     this.wss = new WebSocketServer({ path: '/ws', server });
 
-    this.wss.on('connection', (ws) => {
+    this.wss.on('connection', (ws: WebSocket) => {
       let clientId = getRandomName();
-      this.clients.set(clientId, { name: clientId, url: '', parameters: '' });
+      this.clients.set(clientId, { name: clientId, url: '', parameters: '', ws });
       logger.info(LogOrigin.Client, `${this.wss.clients.size} Connections with new: ${clientId}`);
 
       // send store payload on connect
@@ -97,9 +98,10 @@ export class SocketServer implements IAdapter {
             if (payload) {
               const previousName = clientId;
               clientId = payload;
+              const prevData = this.clients.get(previousName);
               this.clients.delete(previousName);
               const name = clientId;
-              this.clients.set(clientId, { ...this.clients.get(clientId), name });
+              this.clients.set(clientId, { ...prevData, name });
               logger.info(LogOrigin.Client, `Client ${previousName} renamed to ${clientId}`);
             }
             ws.send(
@@ -173,10 +175,22 @@ export class SocketServer implements IAdapter {
     });
   }
 
-  getClientList(): ReactClientList {
+  getClientList(): Array<ReactClient> {
     const list = new Array(0);
-    this.clients.forEach((value, key) => list.push({ name: key, ...value }));
+    this.clients.forEach((value) => list.push({ ...value, ws: '' }));
+    list.map((value) => {
+      delete value.ws;
+    });
     return list;
+  }
+
+  sendToClient(name: string, message: unknown) {
+    if (this.clients.has(name)) {
+      const { ws } = this.clients.get(name);
+      ws.send(JSON.stringify(message));
+    } else {
+      throw new Error(`Client: ${name} dose not exist`);
+    }
   }
 
   shutdown() {

@@ -23,6 +23,7 @@ export const websocketUrl = `${socketProtocol}://${location.hostname}:${serverPo
 export const projectDataURL = `${serverURL}/project`;
 export const rundownURL = `${serverURL}/events`;
 export const ontimeURL = `${serverURL}/ontime`;
+export const apiUrl = `${serverURL}/api`;
 
 export const stylesPath = 'external/styles/override.css';
 export const overrideStylesURL = `${serverURL}/${stylesPath}`;

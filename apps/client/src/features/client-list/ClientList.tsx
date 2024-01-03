@@ -1,21 +1,43 @@
+import { redirectClient } from '../../common/api/ontimeApi';
 import useClients from '../../common/hooks-query/useClients';
 
-export default function ClientList() {
-  const { data } = useClients();
+const urlList = ['/clock', '/timer'];
 
+export default function ClientList() {
+  const { data, refetch } = useClients();
+  data?.sort();
   if (data) {
     return (
-      <ol style={{ color: 'white' }}>
-        {data.map((v, index) => (
-          <li key={index}>
-            <span>{v.name}</span>
-            <span style={{ position: 'absolute', left: '250px' }}>{v.url}</span>
-            <span style={{ position: 'absolute', left: '350px' }}>{v.parameters}</span>
-          </li>
-        ))}
-      </ol>
+      <div style={{ color: 'gray' }}>
+        <ol>
+          {data.map((v, index) => (
+            <li key={index}>
+              <span style={{ width: '200px', display: 'inline-block' }}>{v.name}</span>
+              <select
+                style={{ width: '200px', display: 'inline-block' }}
+                value={v.url}
+                onChange={(event) => redirectClient(v.name, event.target.value)}
+              >
+                {urlList.map((url) => {
+                  return (
+                    <option key={url} value={url}>
+                      {url}
+                    </option>
+                  );
+                })}
+              </select>
+              <span style={{ width: '200px', display: 'inline-block' }}>{v.parameters}</span>
+            </li>
+          ))}
+        </ol>
+        <button onClick={() => refetch()}>refresh</button>
+      </div>
     );
   } else {
-    return <div>no client</div>;
+    return (
+      <div style={{ color: 'white' }}>
+        <div>no client</div>
+      </div>
+    );
   }
 }

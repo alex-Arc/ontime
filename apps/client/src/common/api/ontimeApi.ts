@@ -8,7 +8,7 @@ import {
   OSCSettings,
   OscSubscription,
   ProjectData,
-  ReactClientList,
+  ReactClient,
   Settings,
   UserFields,
   ViewSettings,
@@ -18,7 +18,7 @@ import { ExcelImportMap } from 'ontime-utils';
 import { apiRepoLatest } from '../../externals';
 import fileDownload from '../utils/fileDownload';
 
-import { ontimeURL } from './apiConstants';
+import { apiUrl, ontimeURL } from './apiConstants';
 
 /**
  * @description HTTP request to retrieve application settings
@@ -50,9 +50,18 @@ export async function getInfo(): Promise<GetInfo> {
  * @description HTTP request to retrieve client list
  * @return {Promise}
  */
-export async function getClientList(): Promise<ReactClientList> {
-  const res = await axios.get(`${ontimeURL}/clients`);
-  return res.data;
+export async function getClientList(): Promise<Array<ReactClient>> {
+  const res = await axios.get(`${apiUrl}/clients`);
+  return res.data.payload;
+}
+
+/**
+ * @description HTTP request to redirect client
+ * @return {Promise}
+ */
+export async function redirectClient(name: string, url: string) {
+  const res = await axios.get(`${apiUrl}/redirectclient?name=${name}&url=${url}`);
+  return res.data.payload;
 }
 
 /**

@@ -5,7 +5,6 @@ import {
   dbUpload,
   getAliases,
   getInfo,
-  getClientList,
   getOSC,
   getHTTP,
   getSettings,
@@ -82,9 +81,6 @@ router.post('/userfields', validateUserFields, postUserFields);
 
 // create route between controller and '/ontime/info' endpoint
 router.get('/info', getInfo);
-
-// create route between controller and '/ontime/clients' endpoint
-router.get('/clients', getClientList);
 
 // create route between controller and '/ontime/osc' endpoint
 router.get('/osc', getOSC);

@@ -6,6 +6,7 @@ import { isPartialTimerMessage, messageService } from '../services/message-servi
 import { PlaybackService } from '../services/PlaybackService.js';
 import { eventStore } from '../stores/EventStore.js';
 import { parse, updateEvent } from './integrationController.config.js';
+import { socket } from '../adapters/WebsocketAdapter.js';
 
 export type ChangeOptions = {
   eventId: string;
@@ -197,6 +198,17 @@ const actionHandlers: Record<string, ActionHandler> = {
   addtime: (payload) => {
     const time = numberOrError(payload);
     PlaybackService.addTime(time);
+    return { payload: 'success' };
+  },
+  clients: (_payload) => {
+    const list = socket.getClientList();
+    return { payload: list };
+  },
+  redirectclient: (payload: { name: string; url: string }) => {
+    assert.isDefined(payload);
+    const { name, url } = payload;
+    console.log(payload);
+    socket.sendToClient(name, { type: 'redirect', payload: { url, parameters: '' } });
     return { payload: 'success' };
   },
 };

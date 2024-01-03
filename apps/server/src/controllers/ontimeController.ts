@@ -7,7 +7,6 @@ import type {
   ProjectData,
   ProjectFileList,
   ErrorResponse,
-  ReactClientList,
 } from 'ontime-types';
 
 import { RequestHandler, Request, Response } from 'express';
@@ -30,7 +29,6 @@ import { runtimeCacheStore } from '../stores/cachingStore.js';
 import { delayedRundownCacheKey } from '../services/rundown-service/delayedRundown.utils.js';
 import { integrationService } from '../services/integration-service/IntegrationService.js';
 import { getFileListFromFolder } from '../utils/getFileListFromFolder.js';
-import { socket } from '../adapters/WebsocketAdapter.js';
 
 // Create controller for GET request to '/ontime/poll'
 // Returns data for current state
@@ -139,13 +137,6 @@ export const getInfo = async (req: Request, res: Response<GetInfo>) => {
     osc,
     cssOverride,
   });
-};
-
-// Create controller for GET request to '/ontime/clients'
-// Returns -
-export const getClientList = async (req: Request, res: Response<ReactClientList>) => {
-  const list = socket.getClientList();
-  res.status(200).send(list);
 };
 
 // Create controller for POST request to '/ontime/aliases'

@@ -113,6 +113,10 @@ export const connectSocket = (preferredClientName?: string) => {
           runtime.setState(state);
           break;
         }
+        case 'redirect': {
+          const { url } = payload;
+          document.location.href = url;
+        }
       }
     } catch (_) {
       // ignore unhandled

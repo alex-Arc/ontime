@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { ReactClientList } from 'ontime-types';
+import { ReactClient } from 'ontime-types';
 
 import { queryRefetchIntervalSlow } from '../../ontimeConfig';
 import { CLIENT_LIST } from '../api/apiConstants';
 import { getClientList } from '../api/ontimeApi';
 
 export default function useClients() {
-  const { data, status, isError, refetch, isFetching } = useQuery<ReactClientList>({
+  const { data, status, isError, refetch, isFetching } = useQuery<Array<ReactClient>>({
     queryKey: CLIENT_LIST,
     queryFn: getClientList,
     retry: 5,
